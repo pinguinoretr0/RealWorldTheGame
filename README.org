@@ -1,0 +1,13 @@
+#+title: Real World: The Game
+TUI Game (%20 Completed)
+
+* Working on right now
+- Game (Introduction has been completed; no TUI support)
+- TUI (Main Menu for the Game)
+
+* Possible Features:
+- Online?
+- Save Data & Records to JSON
+- Create a Market
+- Add option in settings to choose between peak crypto ER & current
+- more...
