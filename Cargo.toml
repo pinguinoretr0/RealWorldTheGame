@@ -1,0 +1,9 @@
+[package]
+name = "rwg"
+version = "0.0.5"
+edition = "2021"
+
+[dependencies]
+crossterm = "0.27.0"
+ratatui = { version = "0.23.0", features = ["all-widgets"]}
+rand = "0.8.5"
