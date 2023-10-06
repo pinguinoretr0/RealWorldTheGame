@@ -1,5 +1,5 @@
 #+title: Real World: The Game
-TUI Game (%20 Completed)
+TUI Game (20% Completed)
 
 * Working on right now
 - Game (Introduction has been completed; no TUI support)
