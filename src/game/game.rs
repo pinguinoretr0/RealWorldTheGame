@@ -1,6 +1,11 @@
 use crate::game::market::crypto_to_usd;
 use rand::Rng;
 
+pub struct PlayerData {
+		pub username: String,
+		pub bank: usize
+}
+
 pub fn cal_rent(username: &str) -> i32 {
     let mut rng = rand::thread_rng();
     let card1 = rng.gen_range(1..=10);
@@ -14,4 +19,11 @@ pub fn cal_rent(username: &str) -> i32 {
 
     let rent = crypto_to_usd(card1 + card2 + card3, 1);
     rent
+}
+
+pub fn run_main(player: &PlayerData) {
+		println!("> Hello {}; Your introduction has been completed. \
+							Its now time for you to start the main game;\n(Type: \"help\" for the manual)", player.username);
+
+		
 }
