@@ -2,7 +2,7 @@ use crate::game::{
 		market::crypto_to_usd,
 		game::cal_rent,
 		game::run_main,
-		game::PlayerData,
+		data::PlayerData,
 };
 use std::io::{self, Write};
 use rand::Rng;
