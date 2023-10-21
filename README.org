@@ -6,8 +6,7 @@ TUI Game (20% Completed)
 - TUI (Main Menu for the Game)
 
 * Possible Features:
-- Online?
 - Save Data & Records to JSON
 - Create a Market
-- Add option in settings to choose between peak crypto ER & current
-- more...
+- CLI Arguments to check player_data
+- Parse Manual.md into a TUI tab
