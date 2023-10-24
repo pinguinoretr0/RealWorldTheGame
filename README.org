@@ -1,12 +1,15 @@
 #+title: Real World: The Game
-TUI Game (20% Completed)
+CLI Game (20% Completed)
 
 * Working on right now
-- Game (Introduction has been completed; no TUI support)
-- TUI (Main Menu for the Game)
+- Introduction has been completed;
+- Main Game
+- Market/Store
+- Time Logging
+- JSON Save Data
 
 * Possible Features:
 - Save Data & Records to JSON
 - Create a Market
 - CLI Arguments to check player_data
-- Parse Manual.md into a TUI tab
+- Parse Manual.md?
