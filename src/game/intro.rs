@@ -2,9 +2,11 @@ use crate::game::{
 		market::crypto_to_usd,
 		game::cal_rent,
 		game::run_main,
+		game::hit_return,
 		data::PlayerData,
 };
-use std::io::{self, Write};
+use std::io::{ self, Write };
+use std::process::Command;
 use rand::Rng;
 
 fn get_usr() -> PlayerData {
@@ -19,7 +21,10 @@ fn get_usr() -> PlayerData {
     if username.len() > 10 {
         println!("\nYour username exceeds 10 characters.\nTruncated to the first 10 characters.\n");
         username.truncate(10);
-    }
+    } else if username.is_empty() {
+				println!("\nUsername must not be empty!\n");
+				return get_usr();
+		}
 
     println!("Username: {}", username);
 
@@ -37,7 +42,6 @@ fn get_usr() -> PlayerData {
 								bank: 0,
 						};
         } else if response.eq_ignore_ascii_case("n") {
-            println!("Enter your new username: ");
             return get_usr();
         } else {
             println!("Invalid input. Please enter 'Y' or 'n'.");
@@ -74,7 +78,11 @@ fn cal_intro_debt(player: &PlayerData) {
 }
 
 pub fn run_intro() {
+		let mut clear_screen = Command::new("clear");
+		clear_screen.status().expect("Process failed to execute");
 		let player = get_usr();
     cal_intro_debt(&player);
+		hit_return();
+		clear_screen.status().expect("Process failed to execute");
 		run_main(&player);
 }
