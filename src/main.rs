@@ -1,7 +1,14 @@
-use crate::game::intro::run_intro;
 use clap::Parser;
-use std::io;
-use std::io::Write;
+use crate::game::{
+		intro::run_intro,
+		game::run_main,
+		data::load_game
+};
+use std::{
+		io::Write,
+		io
+};
+
 mod game;
 
 /// CLI Arguments written for the game 
@@ -9,8 +16,11 @@ mod game;
 #[command(author, version, about, long_about = None)]
 struct Args {
 		/// Runs the game 
-		#[arg(short, long, default_value_t = 0)]
-		play: u8,
+		#[arg(short, long)]
+		play: Option<u8>,
+		/// Load save file
+		#[arg(short, long)]
+		load: Option<String>
 		// /// Checks the bank account of a player (in progress)
 		// #[arg(short, long)]
 		// check_bank: String
@@ -52,16 +62,30 @@ fn display_help() {
 }
 
 fn open_manual_in_current() {
-		// Function will not run the game but open the manual in the current terminal
+		// Function will not run the game but open the manual
 		println!("=+TODO+=");
 }
 
 fn main() {
     let args = Args::parse();
 
+		if let Some(filename) = args.load {
+        match load_game(filename) {
+            Ok(player) => {
+                println!("Player data loaded successfully:");
+                println!("Username: {}", player.username);
+                println!("Bank: {}", player.bank);
+
+								println!("Starting Game...");
+								run_main(&player);
+            }
+            Err(err) => eprintln!("Error loading player data: {}", err),
+        }
+    }
+		
 		match args.play {
-				0 => run_intro(),
-				1 => display_help(),
+				Some(0) => run_intro(),
+				Some(1) => display_help(),
 				_ => display_help(),
 		}
 }

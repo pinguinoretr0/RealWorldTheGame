@@ -1,3 +1,5 @@
+use crate::game::data::PlayerData;
+
 pub fn crypto_to_usd(x: u32, c: u8) -> u128 {
     let er = match c {
         0 => 6500, // BTC
@@ -13,7 +15,7 @@ pub fn crypto_to_usd(x: u32, c: u8) -> u128 {
     (x * er).into()
 }
 
-pub fn open_market() {
+pub fn open_market(player: &PlayerData) {
 		// TODO: Create the Market (Structs/Enums?)
-		println!("Welcome to the Market!");
+		println!("Welcome to the Market {}!", player.username);
 }
