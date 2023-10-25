@@ -14,5 +14,6 @@ pub fn crypto_to_usd(x: u32, c: u8) -> u128 {
 }
 
 pub fn open_market() {
+		// TODO: Create the Market (Structs/Enums?)
 		println!("Welcome to the Market!");
 }
