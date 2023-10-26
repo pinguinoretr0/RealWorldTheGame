@@ -1,8 +1,8 @@
 use serde::{ Deserialize, Serialize };
 use serde_json::json;
 use std::{
-		fs::File,
-		io::Read
+    fs::File,
+    io::Read
 };
 
 #[derive(Serialize, Deserialize)]
@@ -42,7 +42,7 @@ pub fn save_game(player: &PlayerData) {
 }
 
 pub fn load_game(filename: String) -> Result<PlayerData, Box<dyn std::error::Error>> {
-		let mut file = File::open(filename)?;
+    let mut file = File::open(filename)?;
 
     let mut buffer = String::new();
     file.read_to_string(&mut buffer)?;

@@ -4,8 +4,16 @@ use crate::game::{
     data::PlayerData,
     data::save_game
 };
+use std::{
+    process::Command,
+    io
+};
+use prettytable::{
+    Table,
+    row,
+};
 use rand::Rng;
-use std::io;
+
 
 pub fn cal_rent(username: &str) -> i32 {
     let mut rng = rand::thread_rng();
@@ -36,6 +44,10 @@ pub fn hit_return() -> String {
     }
 }
 
+fn craft_nft() {
+  // TODO: Crate NFT Logic  
+}
+
 pub fn run_main(player: &PlayerData) {
     let day_counter: u8 = 0;
 
@@ -62,51 +74,70 @@ fn take_turn(player: &PlayerData) -> u8 {
     let mut turn_counter: u8 = 0;
 
     loop {
-        print!("\n");
+        println!();
         let mut turn = String::new();
         io::stdin().read_line(&mut turn).unwrap();
         let turn = turn.trim();
 
-        if turn.is_empty() {
-            println!("Please input a valid option!");
-            return take_turn(&player);
-        } else if turn == "list" || turn == "List" {
-            let options = [
-                "\"list\": Lists options",
-                "\"market\": Opens the Market Menu",
-                "\"save\": Saves current game",
-                "\"check\": Displays turns left & time limit",
-                "\"create\": Creates NFTs (uses 1 turn)",
-                "\"end\": Manually ends your turn"
-            ];
-
-            for option in options.iter() {
-                println!("\n{}", option);
+        match turn.to_lowercase().as_str() {
+            "" => {
+                println!("Please input a valid option!");
+                return take_turn(&player);
             }
+            "list" | "help" => {
+                let mut list = Table::new();
+                println!();
 
-						return take_turn(&player);
-        } else if turn == "market" || turn == "Market" {
-            open_market(&player);
-            return take_turn(&player);
-        } else if turn == "save" || turn == "Save" {
-						println!("Saving Game Data...");
-						save_game(&player);
-						return take_turn(&player);
-				}
-
-				else if turn == "create" || turn == "Create" {
-            // TODO: Set up NFT building + stats
-            println!("*builds nft*");
-            return take_turn(&player);
-        } else if turn == "end" || turn == "End" {
-            println!("You have manually ended your turn...");
-            turn_counter += 1;
-            println!("Turn Counter: {}", turn_counter);
-            break;
-        }
-        else {
-            println!("Please input a valid option!");
-            return take_turn(&player);
+                // Header
+                list.add_row(row!["Command", "Description"]);
+                // Options
+                list.add_row(row!["\"list\"", "Prints this command"]);
+                list.add_row(row!["\"market\"", "Opens the Market Menu"]);
+                list.add_row(row!["\"create\"", "Creates NFTs (uses 1 turn) N/A"]);
+                list.add_row(row!["\"clear\"", "Clears the screen"]);
+                list.add_row(row!["\"check\"", "Displays turns left & time limit N/A"]);
+                list.add_row(row!["\"end\"", "Manually ends current turn N/A"]);
+                list.add_row(row!["\"save\"", "Saves the current game"]);
+                list.add_row(row!["\"quit\"", "Quits game (without saving!) N/A"]);
+  
+                // Table setup...
+                list.printstd();
+                return take_turn(&player);
+            }
+            "market" => {
+                open_market(&player);
+                return take_turn(&player);
+            }
+            "save" => {
+                println!("\nSaving Game Data...");
+                save_game(&player);
+                return take_turn(&player);
+            }
+            "clear" => {
+                let mut clear_screen = Command::new("clear");
+                clear_screen.status().expect("Process failed to execute");
+                return take_turn(&player);
+            }
+            "create" => {
+                // TODO: Set up NFT building + stats
+                println!("*builds nft*");
+                return take_turn(&player);
+            }
+            "end" => {
+                println!("You have manually ended your turn...");
+                turn_counter += 1;
+                println!("Turn Counter: {}", turn_counter);
+                break;
+            }
+            "quit" => {
+                println!("[ O K ]");
+                println!("Exiting Game...");
+                break;
+            }
+            _ => {
+                println!("Please input a valid option!");
+                return take_turn(&player);
+            }
         }
     }
 

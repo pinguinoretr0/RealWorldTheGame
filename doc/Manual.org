@@ -1,4 +1,4 @@
-#+TITLE: Real World The Game! :: Manual
+#+TITLE: Real World: The Game! :: Manual
 * Table of contents:
 ** An introduction:
 *** Setting:
@@ -15,7 +15,7 @@
 *** Example Day
 -----------------------------------------------------------------------------------------------
 * An Introduction 
-In "Real World The Game" you experience the game of a lifetime.
+In "Real World: The Game" you experience the game of a lifetime.
 There are a couple of things that are going to be explained for the player's knowledge.
 
 ** Setting:
