@@ -1,5 +1,6 @@
 use crate::game::{
-    market::crypto_to_usd,
+		market::NFT,
+		market::crypto_to_usd,
     game::cal_rent,
     game::run_main,
     game::hit_return,
@@ -77,12 +78,12 @@ fn cal_intro_debt(player: &PlayerData) {
     println!("{}'s rent is {} USD.\n", player.username, rent);
 }
 
-pub fn run_intro() {
+pub fn run_intro(nft: &NFT) {
     let mut clear_screen = Command::new("clear");
     clear_screen.status().expect("Process failed to execute");
     let player = get_usr();
     cal_intro_debt(&player);
     hit_return();
     clear_screen.status().expect("Process failed to execute");
-    run_main(&player);
+    run_main(&player, &nft);
 }
