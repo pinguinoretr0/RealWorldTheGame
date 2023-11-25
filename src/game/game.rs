@@ -1,14 +1,15 @@
 use crate::game::{
-		market::NFT,
-		market::create_nft,
-		market::crypto_to_usd,
+    market::NFT,
+    market::create_nft,
+    market::crypto_to_usd,
     market::open_market,
-		data::PlayerData,
+    data::PlayerData,
+    data::GameData,
     data::save_game
 };
 use std::{
-		process::Command,
-		io
+    process::Command,
+    io
 };
 use prettytable::{
     Table,
@@ -16,7 +17,7 @@ use prettytable::{
 };
 use rand::Rng;
 
-pub fn cal_rent(username: &str) -> i32 {
+pub fn cal_rent(username: &str) -> u32 {
     let mut rng = rand::thread_rng();
     let card1 = rng.gen_range(1..=10);
     let card2 = rng.gen_range(1..=10);
@@ -45,17 +46,17 @@ pub fn hit_return() -> String {
     }
 }
 
-pub fn run_main(player: &PlayerData, nft: &NFT) {
+pub fn run_main(player: &PlayerData, game: &GameData, nft: &mut NFT) {
     let day_counter: u8 = 0;
 
-		println!("> Hello {};\nYour introduction has been completed. \
-							Its now time for you to start the Main Game!\n(Type: \"help\" for the manual; \"list\" for a list of options)", player.username);
+    println!("> Hello {};\nYour introduction has been completed. \
+              Its now time for you to start the Main Game!\n(Type: \"help\" for the manual; \"list\" for a list of options)", player.username);
 
     if day_counter <= 30 {
         let turn_value: u8 = cal_limit();
 
         for _ in 0..turn_value {
-            take_turn(&player, &nft);
+            take_turn(&player, &game, nft);
         }   
     } else {
         println!("Game Over!");
@@ -67,7 +68,7 @@ fn cal_limit() -> u8 {
     30
 }
 
-fn take_turn(player: &PlayerData, nft: &NFT) -> u8 {
+fn take_turn(player: &PlayerData, game: &GameData, mut nft: &mut NFT) -> u8 {
     let mut turn_counter: u8 = 0;
 
     loop {
@@ -79,7 +80,7 @@ fn take_turn(player: &PlayerData, nft: &NFT) -> u8 {
         match turn.to_lowercase().as_str() {
             "" => {
                 println!("Please input a valid option!");
-                return take_turn(&player, &nft);
+                return take_turn(&player, &game, &mut nft);
             }
             "list" | "help" => {
                 let mut list = Table::new();
@@ -99,26 +100,26 @@ fn take_turn(player: &PlayerData, nft: &NFT) -> u8 {
   
                 // Table setup...
                 list.printstd();
-                return take_turn(&player, &nft);
+                return take_turn(&player, &game, &mut nft);
             }
             "market" => {
                 open_market(&player);
-                return take_turn(&player, &nft);
+                return take_turn(&player, &game, &mut nft);
             }
             "save" => {
                 println!("\nSaving Game Data...");
-                save_game(&player);
-                return take_turn(&player, &nft);
+                save_game(&player, &game);
+                return take_turn(&player, &game, &mut nft);
             }
             "clear" => {
                 let mut clear_screen = Command::new("clear");
                 clear_screen.status().expect("Process failed to execute");
-                return take_turn(&player, &nft);
+                return take_turn(&player, &game, &mut nft);
             }
             "create" => {
                 // TODO: Set up NFT building + stats
-								create_nft(&nft);
-								return take_turn(&player, &nft);
+                create_nft(&mut nft, &game);
+                return take_turn(&player, &game, &mut nft);
             }
             "end" => {
                 println!("You have manually ended your turn...");
@@ -133,7 +134,7 @@ fn take_turn(player: &PlayerData, nft: &NFT) -> u8 {
             }
             _ => {
                 println!("Please input a valid option!");
-                return take_turn(&player, &nft);
+                return take_turn(&player, &game, &mut nft);
             }
         }
     }

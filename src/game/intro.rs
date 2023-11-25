@@ -1,10 +1,11 @@
 use crate::game::{
-		market::NFT,
-		market::crypto_to_usd,
+    market::NFT,
+    market::crypto_to_usd,
     game::cal_rent,
     game::run_main,
     game::hit_return,
     data::PlayerData,
+    data::GameData,
 };
 use std::io::{ self, Write };
 use std::process::Command;
@@ -50,7 +51,7 @@ fn get_usr() -> PlayerData {
     }
 }
 
-fn cal_intro_debt(player: &PlayerData) {
+fn cal_intro_debt(player: &PlayerData) -> GameData {
     let mut rng = rand::thread_rng();
     let mut rolls_list = [0; 3];
     let irs_debt;
@@ -76,14 +77,24 @@ fn cal_intro_debt(player: &PlayerData) {
     println!("Calculating {}'s rent total...\n", player.username);
     let rent = cal_rent(&player.username);
     println!("{}'s rent is {} USD.\n", player.username, rent);
+
+    return GameData {
+        irsdebt: irs_debt,
+        carteldebt: cartel_debt,
+        rent: rent,
+
+        // this will be handeled after the intro 
+        current_day: 0,
+        current_hrs: 0,
+    };
 }
 
-pub fn run_intro(nft: &NFT) {
+pub fn run_intro(nft: &mut NFT) {
     let mut clear_screen = Command::new("clear");
     clear_screen.status().expect("Process failed to execute");
     let player = get_usr();
-    cal_intro_debt(&player);
+    let gamedata = cal_intro_debt(&player);
     hit_return();
     clear_screen.status().expect("Process failed to execute");
-    run_main(&player, &nft);
+    run_main(&player, &gamedata, nft);
 }

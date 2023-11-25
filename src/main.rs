@@ -1,8 +1,9 @@
 use clap::Parser;
 use crate::game::{
-		market::NFT,
-		intro::run_intro,
+    market::NFT,
+    intro::run_intro,
     game::run_main,
+    data::GameData,
     data::load_game
 };
 use std::{
@@ -69,24 +70,25 @@ fn open_manual() {
 
 fn main() {
     let args = Args::parse();
-		let nft = NFT::default();
-
-		if let Some(filename) = args.load {
-				match load_game(filename) {
-						Ok(player) => {
-								println!("Player data loaded successfully:");
-								println!("Username: {}", player.username);
-								println!("Bank: {}", player.bank);
-
-								println!("Starting Game...");
-								run_main(&player, &nft);
-						}
-						Err(err) => eprintln!("Error loading player data: {}", err),
-				}
-		}
+    let game = GameData::default();
+    let mut nft = NFT::default();
     
+    if let Some(filename) = args.load {
+        match load_game(filename) {
+            Ok(player) => {
+                println!("Player data loaded successfully:");
+                println!("Username: {}", player.username);
+                println!("Bank: {}", player.bank);
+
+                println!("Starting Game...");
+                run_main(&player, &game, &mut nft);
+            }
+            Err(err) => eprintln!("Error loading player data: {}", err),
+        }
+    }
+
     match args.play {
-        Some(0) => run_intro(&nft),
+        Some(0) => run_intro(&mut nft),
         Some(1) => display_help(),
         _ => display_help(),
     }

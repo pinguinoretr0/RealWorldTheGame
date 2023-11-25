@@ -1,16 +1,18 @@
+use crate::game::data::GameData;
 use crate::game::data::PlayerData;
+
 use std::io;
 use rand::Rng;
 use prettytable::{
-		Table,
-		row,
+    Table,
+    row,
 };
 
 #[derive(Default)]
 pub struct NFT {
-		limit: u32,
-		value: usize,
-		trash: bool
+    limit: u8,
+    value: usize,
+    trash: bool
 }
 
 struct Stock {
@@ -42,68 +44,100 @@ pub fn crypto_to_usd(x: u32, c: u8) -> u128 {
     (x * exchange_rate).into()
 }
 
-pub fn create_nft(nft: &NFT) -> bool {
-		let mut rng = rand::thread_rng();
-		let mut rolls_list = [0; 2];
-		let mut hours: u8;
+pub fn create_nft(
+    mut nft: &mut NFT,
+    game: &GameData
+) -> bool {
+    let mut rng = rand::thread_rng();
+    let mut rolls_list = [0; 2];
+    let mut nft_counter: u8 = 0;
+    let mut hrs: u8 = game.current_hrs;
+    let mut days: u8 = game.current_day;
 
-		println!("Creating NFT...");
-		rolls_list[0] = rng.gen_range(1..=6);
-		rolls_list[1] = rng.gen_range(1..=6);
+    println!("Creating NFT...");
+    nft_counter += 1;
 
-		println!("Set the price of your NFT");
-		let mut nft_price = String::new();
-		io::stdin().read_line(&mut nft_price).unwrap();
-		println!("You typed: {nft_price}");
+    // get that time shit logic
+    for _ in 0..nft_counter {
+        hrs += 2;
+        println!("Spent two hours creating nft..");
+        
+        if hrs >= 24 {
+            hrs = 0;
+            days += 1;
 
-		// R1 | Determines if purchase was successful
+            println!("days: {}", days);
+        } else if days >= 30 {
+            // add end game logic or make a function for it?
+            println!("You are all out of time!");
+        }
+    }
+
+    let total_hours: u8 = hrs * nft_counter;
+    rolls_list[0] = rng.gen_range(1..=6);
+    rolls_list[1] = rng.gen_range(1..=6);
+
+    println!("Set the price of your NFT\n");
+    let mut nft_price = String::new();
+    io::stdin().read_line(&mut nft_price).unwrap();
+    let nft_price = nft_price.trim();
+    
+    let price = if let Ok(parsed_price) = nft_price.parse::<usize>() {
+        println!("NFT's Price: {}", parsed_price);
+        Some(parsed_price)
+    } else {
+        println!("You must set a price of non-zero!");
+        return create_nft(&mut nft, &game);
+    };
+
+    // R1 | Determines if purchase was successful
     let purchase_success = match rolls_list[0] {
-        1..=3 => true,
+        1..=3 => {
+            println!("Purchase Succeded! (You rolled a: {})", rolls_list[0]);
+            true
+        },
         4..=6 => {
-            println!("Purchase Failed!");
-            return false;
+            println!("Purchase Failed! (You rolled a: {})", rolls_list[0]);
+            false
         }
         _ => unreachable!(),
     };
-
+    
+    println!("Checking the price adjustment...");
+        
     // R2 | Determines price adjustment 
     let price_adjustment = match rolls_list[1] {
         1..=3 => {
-            println!("Regular Price");
+            println!("Your NFT's price stays at its original.");
             1.0
         }
         4..=6 => {
-            println!("Double Price");
+            println!("Your NFT's price has doubled!");
             2.0
         }
         _ => unreachable!(),
     };
 
-    // If the purchase is successful, proceed with creating and pricing the NFT
-    // if purchase_success {
-    //     // Logic for creating NFT (you might want to update the NFT struct fields accordingly)
-    //     // For example:
-    //     // nft.limit = some_value;
-    //     // nft.value = some_value;
-    //     // nft.trash = some_value;
+    // if the purchase ran, then do NFT shit 
+    if purchase_success {
+        nft.limit = nft_counter;
+        if let Some(parsed_price) = price {
+            nft.value = parsed_price;
+        }
+        nft.trash = false;
 
-    //     // Logic for determining the NFT price based on the price adjustment
-    //     let base_price = 15; // You can replace this with the actual base price
-    //     let nft_price = (base_price as f64 * price_adjustment) as u32;
+        let nft_price = (nft.value as f64 * price_adjustment) as u32;
 
-    //     // Logic for determining the time spent on creating the NFT
-    //     // For example:
-    //     // hours = some_value;
+        // end results
+        println!("NFT Created Successfully!");
+        println!("NFT Price: {} <USD>", nft_price);
+        println!("Time Spent: {} hours", hrs);
+        println!("Total Hours: {} hours", total_hours)
+    } else {
+        println!("\nNo NFT created due to failed purchase!\n");
+    }
 
-    //     // Display the results
-    //     println!("NFT Created Successfully!");
-    //     println!("NFT Price: {} Litecoin", nft_price);
-    //     println!("Time Spent: {} hours", hours);
-    // } else {
-    //     println!("No NFT created due to failed purchase!");
-    // }
-
-		purchase_success
+    purchase_success
 }
 
 pub fn open_market(player: &PlayerData) {
