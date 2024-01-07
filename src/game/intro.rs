@@ -96,5 +96,5 @@ pub fn run_intro(nft: &mut NFT) {
     let gamedata = cal_intro_debt(&player);
     hit_return();
     clear_screen.status().expect("Process failed to execute");
-    run_main(&player, &gamedata, nft);
+    run_main(&player, gamedata, nft);
 }

@@ -1,5 +1,8 @@
-use crate::game::data::GameData;
-use crate::game::data::PlayerData;
+use crate::game::{
+		data::GameData,
+		data::PlayerData,
+		game::end_game
+};
 
 use std::io;
 use rand::Rng;
@@ -46,7 +49,7 @@ pub fn crypto_to_usd(x: u32, c: u8) -> u128 {
 
 pub fn create_nft(
     mut nft: &mut NFT,
-    game: &GameData
+    game: GameData
 ) -> bool {
     let mut rng = rand::thread_rng();
     let mut rolls_list = [0; 2];
@@ -68,8 +71,7 @@ pub fn create_nft(
 
             println!("days: {}", days);
         } else if days >= 30 {
-            // add end game logic or make a function for it?
-            println!("You are all out of time!");
+            end_game();
         }
     }
 
@@ -87,7 +89,7 @@ pub fn create_nft(
         Some(parsed_price)
     } else {
         println!("You must set a price of non-zero!");
-        return create_nft(&mut nft, &game);
+        return create_nft(&mut nft, game);
     };
 
     // R1 | Determines if purchase was successful

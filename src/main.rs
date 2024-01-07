@@ -71,7 +71,7 @@ fn open_manual() {
 fn main() {
     let args = Args::parse();
     let game = GameData::default();
-    let mut nft = NFT::default();
+		let mut nft = NFT::default();
     
     if let Some(filename) = args.load {
         match load_game(filename) {
@@ -81,7 +81,7 @@ fn main() {
                 println!("Bank: {}", player.bank);
 
                 println!("Starting Game...");
-                run_main(&player, &game, &mut nft);
+                run_main(&player, game, &mut nft);
             }
             Err(err) => eprintln!("Error loading player data: {}", err),
         }

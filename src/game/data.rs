@@ -11,7 +11,7 @@ pub struct PlayerData {
     pub bank: usize
 }
 
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub struct GameData {
     // Base Game
     pub irsdebt: u128,
