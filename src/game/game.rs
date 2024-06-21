@@ -47,12 +47,12 @@ pub fn hit_return() -> String {
 }
 
 pub fn run_main(
-		player: &PlayerData,
-		game: GameData,
-		nft: &mut NFT
+        player: &PlayerData,
+        game: GameData,
+        nft: &mut NFT
 ) {
     let day_counter: u8 = 0;
-		let new_game = game.clone();
+        let new_game = game.clone();
 
     println!("> Hello {};\nYour introduction has been completed. \
               Its now time for you to start the Main Game!\n(Type: \"help\" for the manual; \"list\" for a list of options)", player.username);
@@ -61,7 +61,7 @@ pub fn run_main(
         let turn_value: u8 = cal_limit();
 
         for _ in 0..turn_value {
-            take_turn(&player, new_game, nft);
+            take_turn(&player, new_game.clone(), nft);
         }   
     } else {
         println!("Game Over!");
@@ -74,9 +74,9 @@ fn cal_limit() -> u8 {
 }
 
 fn take_turn(
-		player: &PlayerData,
-		game: GameData,
-		mut nft: &mut NFT
+        player: &PlayerData,
+        game: GameData,
+        mut nft: &mut NFT
 ) -> u8 {
     let mut turn_counter: u8 = 0;
 
@@ -127,7 +127,7 @@ fn take_turn(
             }
             "create" => {
                 // TODO: Set up NFT building + stats
-                create_nft(&mut nft, game);
+                create_nft(&mut nft, game.clone());
                 return take_turn(&player, game, &mut nft);
             }
             "end" => {
@@ -152,5 +152,5 @@ fn take_turn(
 }
 
 pub fn end_game() {
-		println!("Your game has ended!");
+    println!("Your game has ended!");
 }

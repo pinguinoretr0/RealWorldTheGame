@@ -6,9 +6,18 @@ use crate::game::{
     data::GameData,
     data::load_game
 };
+use crossterm::{
+    event::{self, KeyCode, KeyEventKind},
+    terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
+    ExecutableCommand,
+};
+use ratatui::{
+    prelude::{CrosstermBackend, Stylize, Terminal},
+    widgets::Paragraph,
+};
 use std::{
-    io::Write,
-    io
+    io,
+    io::{Write, stdout, Result}
 };
 
 mod game;
@@ -65,13 +74,44 @@ fn display_help() {
 
 fn open_manual() {
     // Function will not run the game but open the manual
-    println!("=+TODO+=");
+    println!("Manual CLI & Manual TUI");
+}
+
+fn launch_tui() -> Result<()> {
+    stdout().execute(EnterAlternateScreen)?;
+    enable_raw_mode()?;
+    let mut terminal = Terminal::new(CrosstermBackend::new(stdout()))?;
+    terminal.clear()?;
+
+    loop {
+        terminal.draw(|frame| {
+            let area = frame.size();
+            frame.render_widget(
+                Paragraph::new("Hellow Ratatui! (press 'q' to quit)")
+                    .white()
+                    .on_blue(),
+                area,
+            );
+        })?;
+
+        if event::poll(std::time::Duration::from_millis(16))? {
+            if let event::Event::Key(key) = event::read()? {
+                if key.kind == KeyEventKind::Press && key.code == KeyCode::Char('q') {
+                    break;
+                }
+            }
+        }
+    }
+
+    stdout().execute(LeaveAlternateScreen)?;
+    disable_raw_mode()?;
+    Ok(())
 }
 
 fn main() {
     let args = Args::parse();
     let game = GameData::default();
-		let mut nft = NFT::default();
+    let mut nft = NFT::default();
     
     if let Some(filename) = args.load {
         match load_game(filename) {
@@ -88,8 +128,8 @@ fn main() {
     }
 
     match args.play {
-        Some(0) => run_intro(&mut nft),
-        Some(1) => display_help(),
+        Some(0) => launch_tui().expect("Failure to launch UI"),
+        Some(1) => run_intro(&mut nft),
         _ => display_help(),
     }
 }
