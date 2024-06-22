@@ -3,38 +3,54 @@ use crate::game::{
     market::NFT,
     intro::run_intro,
     game::run_main,
+    game::open_manual,
     data::GameData,
     data::load_game
 };
-use crossterm::{
-    event::{self, KeyCode, KeyEventKind},
-    terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
-    ExecutableCommand,
-};
-use ratatui::{
-    prelude::{CrosstermBackend, Stylize, Terminal},
-    widgets::Paragraph,
+use crate::tui::{
+    ui::launch_tui
 };
 use std::{
     io,
-    io::{Write, stdout, Result}
+    io::Write,
 };
+use log::info;
 
 mod game;
+mod tui;
 
-/// CLI Arguments written for the game 
+/// Real World: The Game CLI 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {
-    /// Runs the game 
+    /// Run the game (Options: 0 - TUI 1 - CLI) 
     #[arg(short, long)]
     play: Option<u8>,
-    /// Load save file
+    /// Load your save file (FILEPATH)
     #[arg(short, long)]
     load: Option<String>
     // /// Checks the bank account of a player (in progress)
     // #[arg(short, long)]
     // check_bank: String
+}
+
+pub trait Output {
+    fn print(&self, message: &str);
+}
+
+pub struct CliOutput;
+pub struct TuiOutput;
+
+impl Output for CliOutput {
+    fn print(&self, message: &str) {
+        println!("{}", message);
+    }
+}
+
+impl Output for TuiOutput {
+    fn print(&self, message: &str) {
+        info!("{}", message);
+    }
 }
 
 fn display_help() {
@@ -51,7 +67,8 @@ fn display_help() {
         let response = response.trim().to_string();
 
         if response.is_empty() || response.eq_ignore_ascii_case("1") {
-            open_manual();
+            let output = CliOutput;
+            open_manual(&output);
             break;
         } else if response.eq_ignore_ascii_case("2") {
             println!("\nReal World: The Game is a game where you are placed in \
@@ -72,47 +89,29 @@ fn display_help() {
     }
 }
 
-fn open_manual() {
-    // Function will not run the game but open the manual
-    println!("Manual CLI & Manual TUI");
-}
-
-fn launch_tui() -> Result<()> {
-    stdout().execute(EnterAlternateScreen)?;
-    enable_raw_mode()?;
-    let mut terminal = Terminal::new(CrosstermBackend::new(stdout()))?;
-    terminal.clear()?;
-
-    loop {
-        terminal.draw(|frame| {
-            let area = frame.size();
-            frame.render_widget(
-                Paragraph::new("Hellow Ratatui! (press 'q' to quit)")
-                    .white()
-                    .on_blue(),
-                area,
-            );
-        })?;
-
-        if event::poll(std::time::Duration::from_millis(16))? {
-            if let event::Event::Key(key) = event::read()? {
-                if key.kind == KeyEventKind::Press && key.code == KeyCode::Char('q') {
-                    break;
-                }
-            }
-        }
-    }
-
-    stdout().execute(LeaveAlternateScreen)?;
-    disable_raw_mode()?;
-    Ok(())
-}
-
 fn main() {
     let args = Args::parse();
-    let game = GameData::default();
+    let gamedata = GameData::default();
     let mut nft = NFT::default();
     
+    let output: Box<dyn Output> = match args.play {
+        Some(0) => {
+            launch_tui().expect("Failure to launch UI");
+            Box::new(TuiOutput)
+        },
+        Some(1) => {
+            if args.load.is_none() {
+                let cli = CliOutput;
+                run_intro(&mut nft, &cli);
+            }
+            Box::new(CliOutput)
+        },
+        _ => {
+            eprintln!("Invalid play mode. Expected 0 for TUI or 1 for CLI.");
+            return;
+        }
+    };
+
     if let Some(filename) = args.load {
         match load_game(filename) {
             Ok(player) => {
@@ -121,15 +120,9 @@ fn main() {
                 println!("Bank: {}", player.bank);
 
                 println!("Starting Game...");
-                run_main(&player, game, &mut nft);
+                run_main(&player, gamedata, &mut nft, &*output);
             }
             Err(err) => eprintln!("Error loading player data: {}", err),
         }
-    }
-
-    match args.play {
-        Some(0) => launch_tui().expect("Failure to launch UI"),
-        Some(1) => run_intro(&mut nft),
-        _ => display_help(),
     }
 }

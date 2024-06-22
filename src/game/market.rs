@@ -1,3 +1,4 @@
+use crate::{CliOutput, Output};
 use crate::game::{
 		data::GameData,
 		data::PlayerData,
@@ -49,7 +50,8 @@ pub fn crypto_to_usd(x: u32, c: u8) -> u128 {
 
 pub fn create_nft(
     mut nft: &mut NFT,
-    game: GameData
+    game: GameData,
+    output: &dyn Output
 ) -> bool {
     let mut rng = rand::thread_rng();
     let mut rolls_list = [0; 2];
@@ -57,21 +59,21 @@ pub fn create_nft(
     let mut hrs: u8 = game.current_hrs;
     let mut days: u8 = game.current_day;
 
-    println!("Creating NFT...");
+    output.print("Creating NFT...");
     nft_counter += 1;
 
     // get that time shit logic
     for _ in 0..nft_counter {
         hrs += 2;
-        println!("Spent two hours creating nft..");
+        output.print("Spent two hours creating nft..");
         
         if hrs >= 24 {
             hrs = 0;
             days += 1;
 
-            println!("days: {}", days);
+            output.print(&format!("days: {}", days));
         } else if days >= 30 {
-            end_game();
+            end_game(output);
         }
     }
 
@@ -79,42 +81,42 @@ pub fn create_nft(
     rolls_list[0] = rng.gen_range(1..=6);
     rolls_list[1] = rng.gen_range(1..=6);
 
-    println!("Set the price of your NFT\n");
+    output.print("Set the price of your NFT\n");
     let mut nft_price = String::new();
     io::stdin().read_line(&mut nft_price).unwrap();
     let nft_price = nft_price.trim();
     
     let price = if let Ok(parsed_price) = nft_price.parse::<usize>() {
-        println!("NFT's Price: {}", parsed_price);
+        output.print(&format!("NFT's Price: {}", parsed_price));
         Some(parsed_price)
     } else {
-        println!("You must set a price of non-zero!");
-        return create_nft(&mut nft, game);
+        output.print("You must set a price of non-zero!");
+        return create_nft(&mut nft, game, output);
     };
 
     // R1 | Determines if purchase was successful
     let purchase_success = match rolls_list[0] {
         1..=3 => {
-            println!("Purchase Succeded! (You rolled a: {})", rolls_list[0]);
+            output.print(&format!("Purchase Succeded! (You rolled a: {})", rolls_list[0]));
             true
         },
         4..=6 => {
-            println!("Purchase Failed! (You rolled a: {})", rolls_list[0]);
+            output.print(&format!("Purchase Failed! (You rolled a: {})", rolls_list[0]));
             false
         }
         _ => unreachable!(),
     };
     
-    println!("Checking the price adjustment...");
+    output.print("Checking the price adjustment...");
         
     // R2 | Determines price adjustment 
     let price_adjustment = match rolls_list[1] {
         1..=3 => {
-            println!("Your NFT's price stays at its original.");
+            output.print("Your NFT's price stays at its original.");
             1.0
         }
         4..=6 => {
-            println!("Your NFT's price has doubled!");
+            output.print("Your NFT's price has doubled!");
             2.0
         }
         _ => unreachable!(),
@@ -131,18 +133,18 @@ pub fn create_nft(
         let nft_price = (nft.value as f64 * price_adjustment) as u32;
 
         // end results
-        println!("NFT Created Successfully!");
-        println!("NFT Price: {} <USD>", nft_price);
-        println!("Time Spent: {} hours", hrs);
-        println!("Total Hours: {} hours", total_hours)
+        output.print("NFT Created Successfully!");
+        output.print(&format!("NFT Price: {} <USD>", nft_price));
+        output.print(&format!("Time Spent: {} hours", hrs));
+        output.print(&format!("Total Hours: {} hours", total_hours))
     } else {
-        println!("\nNo NFT created due to failed purchase!\n");
+        output.print("\nNo NFT created due to failed purchase!\n");
     }
 
     purchase_success
 }
 
-pub fn open_market(player: &PlayerData) {
+pub fn open_market(player: &PlayerData, output: &dyn Output) {
     let mut market: Vec<Stock> = Vec::new();
     let mut menu = Table::new();
 
@@ -164,8 +166,8 @@ pub fn open_market(player: &PlayerData) {
     });
     
     // Display
-    println!("\nWelcome to the Market {}!", player.username);
-    println!("Here are your options:\n");
+    output.print(&format!("\nWelcome to the Market {}!", player.username));
+    output.print("Here are your options:\n");
 
     // Header
     menu.add_row(row!["Item Name", "Price (USD)", "Description", "Effect", "Stock"]);

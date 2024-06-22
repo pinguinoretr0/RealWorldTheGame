@@ -1,3 +1,4 @@
+use crate::{CliOutput, Output};
 use crate::game::{
     market::NFT,
     market::crypto_to_usd,
@@ -11,9 +12,9 @@ use std::io::{ self, Write };
 use std::process::Command;
 use rand::Rng;
 
-fn get_usr() -> PlayerData {
+fn get_usr(output: &dyn Output) -> PlayerData {
     let mut username = String::new();
-    print!("Enter your username:\n(MAX is 10 characters)\n> ");
+    output.print("Enter your username:\n(MAX is 10 characters)");
     io::stdout().flush().unwrap();
     io::stdin().read_line(&mut username).unwrap();
 
@@ -21,17 +22,17 @@ fn get_usr() -> PlayerData {
     username = username.replace(" ", "_");
     
     if username.len() > 10 {
-        println!("\nYour username exceeds 10 characters.\nTruncated to the first 10 characters.\n");
+        output.print("\nYour username exceeds 10 characters.\nTruncated to the first 10 characters.\n");
         username.truncate(10);
     } else if username.is_empty() {
-        println!("\nUsername must not be empty!\n");
-        return get_usr();
+        output.print("\nUsername must not be empty!\n");
+        return get_usr(output);
     }
 
-    println!("Username: {}", username);
+    output.print(&format!("Username: {}", username));
 
     loop {
-        print!("\nIs this correct? [Y/n]\t> ");
+        output.print("\nIs this correct? [Y/n]");
         io::stdout().flush().unwrap();
 
         let mut response = String::new();
@@ -44,39 +45,39 @@ fn get_usr() -> PlayerData {
                 bank: 0,
             };
         } else if response.eq_ignore_ascii_case("n") {
-            return get_usr();
+            return get_usr(output);
         } else {
-            println!("Invalid input. Please enter 'Y' or 'n'.");
+            output.print("Invalid input. Please enter 'Y' or 'n'.");
         }
     }
 }
 
-fn cal_intro_debt(player: &PlayerData) -> GameData {
+fn cal_intro_debt(player: &PlayerData, output: &dyn Output) -> GameData {
     let mut rng = rand::thread_rng();
     let mut rolls_list = [0; 3];
     let irs_debt;
     let cartel_debt;
 
-    println!("Rolling Die...");
+    output.print("Rolling Die...");
     rolls_list[0] = rng.gen_range(1..=20);
-    println!("> {} rolled a: {}\n", player.username, rolls_list[0]);
+    output.print(&format!("> {} rolled a: {}\n", player.username, rolls_list[0]));
 
-    println!("Rolling Die...");
+    output.print("Rolling Die...");
     rolls_list[1] = rng.gen_range(1..=20);
-    println!("> {} rolled a: {}\n", player.username, rolls_list[1]);
+    output.print(&format!("> {} rolled a: {}\n", player.username, rolls_list[1]));
 
     irs_debt = crypto_to_usd(rolls_list[0] * rolls_list[1], 0);
-    println!("{} owes {} USD to the IRS...\n", player.username, irs_debt);
+    output.print(&format!("{} owes {} USD to the IRS...\n", player.username, irs_debt));
 
-    println!("Rolling Die...");
+    output.print("Rolling Die...");
     rolls_list[2] = rng.gen_range(1..=20);
-    println!("> {} rolled a: {}", player.username, rolls_list[2]);
+    output.print(&format!("> {} rolled a: {}", player.username, rolls_list[2]));
     cartel_debt = crypto_to_usd(rolls_list[2] * 3, 0);
-    println!("{} owes {} USD to the Cartel...\n", player.username, cartel_debt);
+    output.print(&format!("{} owes {} USD to the Cartel...\n", player.username, cartel_debt));
 
-    println!("Calculating {}'s rent total...\n", player.username);
-    let rent = cal_rent(&player.username);
-    println!("{}'s rent is {} USD.\n", player.username, rent);
+    output.print(&format!("Calculating {}'s rent total...\n", player.username));
+    let rent = cal_rent(&player.username, output);
+    output.print(&format!("{}'s rent is {} USD.\n", player.username, rent));
 
     return GameData {
         irsdebt: irs_debt,
@@ -89,12 +90,12 @@ fn cal_intro_debt(player: &PlayerData) -> GameData {
     };
 }
 
-pub fn run_intro(nft: &mut NFT) {
+pub fn run_intro(nft: &mut NFT, output: &dyn Output) {
     let mut clear_screen = Command::new("clear");
     clear_screen.status().expect("Process failed to execute");
-    let player = get_usr();
-    let gamedata = cal_intro_debt(&player);
-    hit_return();
+    let player = get_usr(output);
+    let gamedata = cal_intro_debt(&player, output);
+    hit_return(output);
     clear_screen.status().expect("Process failed to execute");
-    run_main(&player, gamedata, nft);
+    run_main(&player, gamedata, nft, output);
 }
