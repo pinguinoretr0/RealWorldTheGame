@@ -7,7 +7,7 @@ CLI Game (60% Completed)
 
 *** Working on right now
 - Main Game
-- Time Logging + JSON Save Data
+- Time Logging + TOML Save Data
 - More Market Options
 
 ***** Possible Features:
