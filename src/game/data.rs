@@ -1,81 +1,61 @@
-use serde::{ Deserialize, Serialize };
-use serde_json::json;
+use serde::{Deserialize, Serialize};
 use std::{
     fs::File,
-    io::Read
+    io::{Read, Write},
+    error::Error,
 };
 
-#[derive(Serialize, Deserialize)]
+#[derive(Default, Clone, Serialize, Deserialize)]
 pub struct PlayerData {
     pub username: String,
-    pub bank: usize
-}
+    pub bank: usize,
 
-#[derive(Clone, Default)]
-pub struct GameData {
-    // Base Game
-    pub irsdebt: u128,
-    pub carteldebt: u128,
+    pub irsdebt: u32,
+    pub carteldebt: u32,
     pub rent: u32,
 
-    // Time Data
     pub current_hrs: u8,
     pub current_day: u8,
 }
 
 fn save_playerdata(
     player: &PlayerData,
-    game: &GameData,
-    filename: &str
-) -> Result<(), Box<dyn std::error::Error>> {
-    let game_data = json!({
-        "player": {
-            "username": player.username,
-            "bank": player.bank,
-        },
-        "game": {
-            "irsdebt": game.irsdebt,
-            "carteldebt": game.carteldebt,
-            "rent": game.rent,
-        },
-    });
-
-    let file = File::create(filename)?;
-
-    serde_json::to_writer(file, &game_data)?;
+    filename: &str,
+) -> Result<(), Box<dyn Error>> {
+    let toml_data = toml::to_string(&player)?;
+    let mut file = File::create(filename)?;
+    file.write_all(toml_data.as_bytes())?;
 
     Ok(())
 }
 
-pub fn save_game(player: &PlayerData, game: &GameData) {
+pub fn save_game(player: &PlayerData) {
     let player = PlayerData {
         username: player.username.to_string(),
         bank: player.bank,
+
+        irsdebt: player.irsdebt,
+        carteldebt: player.carteldebt,
+        rent: player.rent,
+
+        current_day: player.current_day,
+        current_hrs: player.current_hrs,
     };
 
-    let game = GameData {
-        irsdebt: game.irsdebt,
-        carteldebt: game.carteldebt,
-        rent: game.rent,
+    // once ready store this file in ~/.local/share/rwg/
+    // for Windows C:\Users\[your username]\AppData
 
-        current_day: game.current_day,
-        current_hrs: game.current_hrs,
-    };
-
-    if let Err(err) = save_playerdata(&player, &game, "player_data.json") {
+    if let Err(err) = save_playerdata(&player, "player_data.toml") {
         eprintln!("Error saving player data: {}", err);
     } else {
         println!("Player data saved successfully!");
     }
 }
 
-pub fn load_game(filename: String) -> Result<PlayerData, Box<dyn std::error::Error>> {
+pub fn load_game(filename: String) -> Result<PlayerData, Box<dyn Error>> {
     let mut file = File::open(filename)?;
-
     let mut buffer = String::new();
     file.read_to_string(&mut buffer)?;
-
-    let player_data: PlayerData = serde_json::from_str(&buffer)?;
-
-    Ok(player_data)
+    let playerdata: PlayerData = toml::from_str(&buffer)?;
+    Ok(playerdata)
 }

@@ -4,7 +4,7 @@ use crate::game::{
     intro::run_intro,
     game::run_main,
     game::open_manual,
-    data::GameData,
+    data::PlayerData,
     data::load_game
 };
 use crate::tui::{
@@ -91,7 +91,6 @@ fn display_help() {
 
 fn main() {
     let args = Args::parse();
-    let gamedata = GameData::default();
     let mut nft = NFT::default();
     
     let output: Box<dyn Output> = match args.play {
@@ -116,11 +115,8 @@ fn main() {
         match load_game(filename) {
             Ok(player) => {
                 println!("Player data loaded successfully:");
-                println!("Username: {}", player.username);
-                println!("Bank: {}", player.bank);
-
                 println!("Starting Game...");
-                run_main(&player, gamedata, &mut nft, &*output);
+                run_main(&player, &mut nft, &*output);
             }
             Err(err) => eprintln!("Error loading player data: {}", err),
         }

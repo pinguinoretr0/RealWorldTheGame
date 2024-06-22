@@ -1,6 +1,5 @@
-use crate::{CliOutput, Output};
+use crate::Output;
 use crate::game::{
-		data::GameData,
 		data::PlayerData,
 		game::end_game
 };
@@ -33,7 +32,7 @@ enum StockConditions {
     Limit(u16),
 }
 
-pub fn crypto_to_usd(x: u32, c: u8) -> u128 {
+pub fn crypto_to_usd(x: u32, c: u8) -> u32 {
     let exchange_rate = match c {
         0 => 6500, // BTC
         1 => 4891, // ETH
@@ -50,14 +49,14 @@ pub fn crypto_to_usd(x: u32, c: u8) -> u128 {
 
 pub fn create_nft(
     mut nft: &mut NFT,
-    game: GameData,
+    player: PlayerData,
     output: &dyn Output
 ) -> bool {
     let mut rng = rand::thread_rng();
     let mut rolls_list = [0; 2];
     let mut nft_counter: u8 = 0;
-    let mut hrs: u8 = game.current_hrs;
-    let mut days: u8 = game.current_day;
+    let mut hrs: u8 = player.current_hrs;
+    let mut days: u8 = player.current_day;
 
     output.print("Creating NFT...");
     nft_counter += 1;
@@ -91,7 +90,7 @@ pub fn create_nft(
         Some(parsed_price)
     } else {
         output.print("You must set a price of non-zero!");
-        return create_nft(&mut nft, game, output);
+        return create_nft(&mut nft, player, output);
     };
 
     // R1 | Determines if purchase was successful
