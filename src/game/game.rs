@@ -60,7 +60,7 @@ pub fn run_main(player: &PlayerData, nft: &mut NFT, output: &dyn Output) {
         let turn_value: u8 = cal_limit();
 
         for _ in 0..turn_value {
-            take_turn(player, nft, output);
+            take_turn_cli(player, nft, output);
         }   
     } else {
         output.print("Game Over!");
@@ -72,7 +72,7 @@ fn cal_limit() -> u8 {
     30
 }
 
-fn take_turn(
+fn take_turn_cli(
     player: &PlayerData,
     nft: &mut NFT,
     output: &dyn Output
@@ -88,7 +88,7 @@ fn take_turn(
         match turn.to_lowercase().as_str() {
             "" => {
                 output.print("Please input a valid option!");
-                return take_turn(player, nft, output);
+                return take_turn_cli(player, nft, output);
             }
             "list" | "help" => {
                 let mut list = Table::new();
@@ -108,26 +108,26 @@ fn take_turn(
   
                 // Table setup...
                 list.printstd();
-                return take_turn(player, nft, output);
+                return take_turn_cli(player, nft, output);
             }
             "market" => {
                 open_market(player, output);
-                return take_turn(player, nft, output);
+                return take_turn_cli(player, nft, output);
             }
             "save" => {
                 output.print("\nSaving Game Data...");
                 save_game(&player);
-                return take_turn(player, nft, output);
+                return take_turn_cli(player, nft, output);
             }
             "clear" => {
                 let mut clear_screen = Command::new("clear");
                 clear_screen.status().expect("Process failed to execute");
-                return take_turn(player, nft, output);
+                return take_turn_cli(player, nft, output);
             }
             "create" => {
                 // TODO: Set up NFT building + stats
                 create_nft(nft, player.clone(), output);
-                return take_turn(player, nft, output);
+                return take_turn_cli(player, nft, output);
             }
             "end" => {
                 output.print("You have manually ended your turn...");
@@ -142,7 +142,7 @@ fn take_turn(
             }
             _ => {
                 output.print("Please input a valid option!");
-                return take_turn(player, nft, output);
+                return take_turn_cli(player, nft, output);
             }
         }
     }

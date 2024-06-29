@@ -11,7 +11,7 @@ use std::io::{ self, Write };
 use std::process::Command;
 use rand::Rng;
 
-fn get_usr(output: &dyn Output) -> PlayerData {
+fn get_usr_cli(output: &dyn Output) -> PlayerData {
     let mut username = String::new();
     output.print("Enter your username:\n(MAX is 10 characters)");
     io::stdout().flush().unwrap();
@@ -25,7 +25,7 @@ fn get_usr(output: &dyn Output) -> PlayerData {
         username.truncate(10);
     } else if username.is_empty() {
         output.print("\nUsername must not be empty!\n");
-        return get_usr(output);
+        return get_usr_cli(output);
     }
 
     output.print(&format!("Username: {}", username));
@@ -45,7 +45,7 @@ fn get_usr(output: &dyn Output) -> PlayerData {
                 ..Default::default()
             };
         } else if response.eq_ignore_ascii_case("n") {
-            return get_usr(output);
+            return get_usr_cli(output);
         } else {
             output.print("Invalid input. Please enter 'Y' or 'n'.");
         }
@@ -90,7 +90,7 @@ fn cal_intro_debt(player: &PlayerData, output: &dyn Output) -> PlayerData {
 pub fn run_intro(nft: &mut NFT, output: &dyn Output) {
     let mut clear_screen = Command::new("clear");
     clear_screen.status().expect("Process failed to execute");
-    let player = get_usr(output);
+    let player = get_usr_cli(output);
     let player = cal_intro_debt(&player, output);
     hit_return(output);
     clear_screen.status().expect("Process failed to execute");

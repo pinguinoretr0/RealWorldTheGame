@@ -4,12 +4,9 @@ use crate::game::{
     intro::run_intro,
     game::run_main,
     game::open_manual,
-    data::PlayerData,
     data::load_game
 };
-use crate::tui::{
-    ui::launch_tui
-};
+use crate::tui::ui::init;
 use std::{
     io,
     io::Write,
@@ -95,7 +92,7 @@ fn main() {
     
     let output: Box<dyn Output> = match args.play {
         Some(0) => {
-            launch_tui().expect("Failure to launch UI");
+            init().expect("Failure to launch UI");
             Box::new(TuiOutput)
         },
         Some(1) => {
