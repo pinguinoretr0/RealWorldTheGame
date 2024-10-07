@@ -5,6 +5,14 @@ import (
   "strings"
   "math/rand"
   "unicode"
+  "log"
+  "errors"
+
+  "rwg/utils/ui"
+
+  //"github.com/aquilax/truncate"
+  "github.com/charmbracelet/huh"
+  //"github.com/charmbracelet/lipgloss"
 )
 
 type Player struct {
@@ -14,7 +22,95 @@ type Player struct {
 //  bestRun     int
 }
 
-// intro.go
+// RWG Global Options
+var (
+  // Define Player
+  CurrentPlayer *Player
+
+  // Profile Manager
+  name          string
+  desc          string
+  opt           bool
+)
+
+func checkUser(s string) bool {
+  var hasUpper, hasSpace, hasGlyph bool
+
+  for _, r := range s {
+    switch {
+    case unicode.IsUpper(r):
+      hasUpper = true
+    case unicode.IsSpace(r):
+      hasSpace = true
+    case unicode.IsSymbol(r):
+      hasGlyph = true
+    case unicode.IsPunct(r):
+      hasGlyph = true
+    }
+
+    if hasUpper || hasSpace || hasGlyph {
+      return true
+    }
+  }
+  return false
+}
+
+func createPlayer(n string, d string) *Player {
+  CurrentPlayer = &Player{Username: n, Description: d}
+  return CurrentPlayer
+}
+
+func ProfileManager(x int) *Player {
+  profileManager := huh.NewForm(
+    huh.NewGroup(
+      huh.NewInput().
+        Title("Enter Your Username:").
+          Value(&name).
+          Validate(func(str string) error {
+              if checkUser(str) != false {
+                return errors.New("Username cannot contian: Uppercases, Spaces, nor Glyphs")
+              }
+
+              if str == "Frank" {
+                  return errors.New("Sorry, we don’t serve customers named Frank.")
+              }
+              return nil
+          }),
+
+      huh.NewText().
+        Title("Player Description:").
+        CharLimit(80).
+        Value(&desc),
+    ),
+  )
+
+  wifiChecker := huh.NewForm(
+    huh.NewGroup(
+      huh.NewConfirm().
+        Title("Do you have an existing user?").
+        Value(&opt),
+    ),
+  )
+
+  switch x {
+  case 0:
+    err := profileManager.Run()
+    if err != nil {
+      log.Fatal(err)
+    }
+    return createPlayer(name, desc)
+  case 1:
+    err := wifiChecker.Run()
+    if err != nil {
+      log.Fatal(err)
+    }
+    return nil
+  }
+  return nil
+}
+
+// MARKET
+
 func calRent(n string) {
   c1 := rand.Intn(10) + 1
   c2 := rand.Intn(10) + 1
@@ -30,7 +126,13 @@ func calRent(n string) {
 }
 
 // n = short for 'name'
-func CalIntroDebt(n string) {
+func CalIntroDebt(n string) { // *Player
+  ui.RunLoadingScreen()
+
+  // REWORK
+  ui.DisplayManual()
+  log.Fatal()
+
   rollsList := make([]int, 0)
   var irsDebt, cartelDebt int
 
@@ -80,32 +182,6 @@ func runCliInput(x int) bool {
       fmt.Println("Invalid input, please enter 'yes' or 'no'")
     }
   }
-}
-
-func CheckUser(s string) bool {
-  var hasUpper, hasSpace, hasGlyph bool
-
-  for _, r := range s {
-    switch {
-    case unicode.IsUpper(r):
-      hasUpper = true
-    case unicode.IsSpace(r):
-      hasSpace = true
-    case unicode.IsSymbol(r):
-      hasGlyph = true
-    case unicode.IsPunct(r):
-      hasGlyph = true
-    }
-
-    if hasUpper || hasSpace || hasGlyph {
-      return true
-    }
-  }
-  return false
-}
-
-func CreatePlayer(n string, d string) Player {
-  return Player{Username: n, Description: d}
 }
 
 func cryptoToUsd(num int, label int) int {

@@ -9,11 +9,9 @@ import (
 
 // cobra cli
 
-  "rwg/utils/ui"
   "rwg/utils/game"
 
   "github.com/charmbracelet/huh"
-  //"github.com/aquilax/truncate"
 )
 
 /* IDEAS
@@ -57,14 +55,14 @@ func launchMainMenu() {
 
   switch gamemode {
   case 0:
-    player := ui.ProfileManager(0)
+    player := game.ProfileManager(0)
     if player != nil {
       game.CalIntroDebt(player.Username)
     }
   case 1:
     fmt.Println("TOML intergration coming soon...")
   case 2:
-    ui.ProfileManager(1)
+    game.ProfileManager(1)
   case 3:
     // settings function
   case 4:
