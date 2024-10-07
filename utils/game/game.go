@@ -18,8 +18,13 @@ import (
 type Player struct {
   Username    string
   Description string
-//  highScore   int
-//  bestRun     int
+
+  IrsDebt     int
+  CartelDebt  int
+  Rent        int
+
+  highScore   int
+  bestRun     int // ?
 }
 
 // RWG Global Options
@@ -128,10 +133,7 @@ func calRent(n string) {
 // n = short for 'name'
 func CalIntroDebt(n string) { // *Player
   ui.RunLoadingScreen()
-
-  // REWORK
-  ui.DisplayManual()
-  log.Fatal()
+  ui.EnableAltScreen()
 
   rollsList := make([]int, 0)
   var irsDebt, cartelDebt int
