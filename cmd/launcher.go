@@ -17,7 +17,6 @@ import (
 /* IDEAS
   LeaderBoard -> Display Online Stats & option to upload online?
   User profile -> CAN be displayed online
-
 */
 
 // RWG Global Options
